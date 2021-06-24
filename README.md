@@ -1,27 +1,95 @@
-# AngularFirebase
+## Angular + Firebase + Authentication guide.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.0.3.
+### Tools: @angular/cli, rxjs, firebase, @angular/fire   
 
-## Development server
+### Preparing:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+1. Create Angular Project using  @angular/cli
 
-## Code scaffolding
+    ```ng new firebase-angular-tutorial```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
-## Build
+2. Install ```firebase``` and ```@angular/fire``` packages for connecting angular app and firebase
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+    ```npm i firebase @angular/fire```
 
-## Running unit tests
+3. Creating Firebase Project 
+  + login to the [firebase](https://firebase.google.com/) 
+  + open [console](https://console.firebase.google.com/)  and click "Add project" button
+  + enter project name (firebase-angular-tutorial) => continue
+  + optional you can enable/disable Google Analytics (I prefer disable) => create project and wait and click => continue
+  + now you located on firebase console, navigate to left sidebar and chose authentication tab => click get started => Sign-in method tab => find Google option  => enable it (enter your email) => save
+  + look at left sidebar menu and and click 'Firestore Database' => create database => Start in test mode => choose cloud firestore location (eur3) => enable
+  + Chose Project overview (Under Firebase logo) and add Web app => enter name (web-app) => register app => continue to console
+  + navigate to Project overview and click settings icon and choose Project Settings 
+  
+  + on General tab scroll down and find your app (in my case web-app), set Config in SDK setup and configuration and copy firebaseConfig to your local project/environments/environment.ts
+  
+  + import environment, AngularFireModule (from @angular/fire) and AngularFirestoreModule(from @angular/fire/firestore) into app.module.ts
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+  + add to module imports: 
+    ```
+    [
+      ...
+      AngularFireModule.initializeApp(environment.firebaseConfig),
+      AngularFirestoreModule
+    ]
+    ```
 
-## Running end-to-end tests
+4) Create authentication service : 
+    ```ts
+    import { Injectable } from '@angular/core';
+    import { AngularFireAuth } from '@angular/fire/auth';
+    import firebase from 'firebase';
+    import auth = firebase.auth;
+    
+    @Injectable({
+      providedIn: 'root'
+    })
+    export class AuthenticationService {
+    
+      constructor(private firebaseAuthentication: AngularFireAuth) { }
+    
+      authenticateWithGoogle() {
+        const authenticationProvider = new auth.GoogleAuthProvider();
+        return this.firebaseAuthentication.signInWithPopup(authenticationProvider);
+      }
+    
+      signOut() {
+        return this.firebaseAuthentication.signOut();
+      }
+    }
+    ```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+    and use 'authenticateWithGoogle()' for login with your account
 
-## Further help
+5) Create **CRUD service** and use angularFireStore for CRUD operation. 
+  + **ADD**: 
+   
+    for Adding item to firebase need to call method collection with collection name as argument:
+    ```js
+    this.angularFirestore.collection<Collection>('posts').add(newPost)
+    ```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+  + **Get** Posts:
+    
+    **warning**: format data that we received has specific structure. Use map to transform data:
+    ```ts
+    this.angularFirestore.collection<Post[]>('posts').snapshotChanges().pipe(map(data => data.map(_post => ({
+      id: _post.payload.doc.id,
+      ..._post.payload.doc.data(),
+    })
+    ```
+  + **Update** Post:
+    ```ts 
+    this.angularFirestore.collection<Post>('posts').doc(id).set(post, { merge: true })
+    ```
+
+  + **Delete** Post:
+    ```ts
+    this.angularFirestore.collection<Post>('posts').doc(post.id).delete()
+    ```
+
+
+    
+
