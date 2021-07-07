@@ -12,7 +12,7 @@
   
 2. Setup project:
   + Include scripts:
-  **Warning: make sure that you project is running in localhost:port number** (webstorm starts automatically, if VS Code use Live Server extension)
+  **Warning: make sure that you project is running on localhost:port number** (webstorm starts automatically, if VS Code use Live Server extension)
   ```js
     <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.7.0/firebase-auth.js"></script>
